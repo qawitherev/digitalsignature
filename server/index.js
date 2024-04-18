@@ -34,13 +34,16 @@ app.post("/getPublicKey", jwtMiddleware, async function(req, res) {
     const publicKey = await keyUtils.getPublicKey()
         if (publicKey === null) {
             console.info("keypair hasn't been generated")
-            res.status(200).send(`Keypair hasn't been generated`)
+            res.status(401).send({error: 'key pair not generated'})
         } 
         res.status(200).json({publicKey})
 })
 
 app.post('/loginJwt', function(req, res) {
-  const token = createJWT(1)
+  const userInfo = req.body
+  console.info(userInfo)
+  const token = createJWT(userInfo)
+  console.info('token created. returning...')
   res.status(200).json({token})
 })
 

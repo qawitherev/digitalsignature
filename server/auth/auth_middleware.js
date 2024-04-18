@@ -17,6 +17,7 @@ function apiKeyMiddleware(req, res, next) {
 function jwtMiddleware(req, res, next) {
   //todo: middleware to check jwt against secret key in .env file
   const authHeader = req.headers["authorization"];
+  console.info(authHeader)
   const token = authHeader && authHeader.split(" ")[1];
 
   if (token == null) {
