@@ -10,6 +10,7 @@ function generateKeypair() {
   const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
     modulusLength: 2048,
   });
+  console.info(`publickey: ${publicKey}`)
   const publicKeyPem = publicKey.export({ type: "pkcs1", format: "pem" });
   const privateKeyPem = privateKey.export({ type: "pkcs1", format: "pem" });
   return { publicKeyPem, privateKeyPem };

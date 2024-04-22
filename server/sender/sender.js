@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const keytar = require("keytar");
 const keyUtils = require('../key/key_utils.js')
+const buffer = require('buffer')
 
 function getFingerprint(plainText) {
   const hash = crypto.createHash("sha256");
@@ -27,5 +28,19 @@ async function generateDigitalSignature(plainText) {
   }
 }
 
+async function generateDigitalSignatureV2(plainText) {
+  try {
+    const algorithm = 'SHA256'
+    const data = Buffer.from(plainText)
+    const { privateKeyPem } = await keyUtils.getKeypair()
+    const signature = crypto.sign(algorithm, data, privateKeyPem)
+    const stringSignature = signature.toString('base64')
+    return { signature, stringSignature }
+  } catch (err) {
+    throw err
+  }
+}
+
 module.exports.getFingerprint = getFingerprint;
 module.exports.generateDigitalSignature = generateDigitalSignature;
+module.exports.generateDigitalSignatureV2 = generateDigitalSignatureV2

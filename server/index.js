@@ -1,5 +1,6 @@
 const express = require("express");
 const sender = require("./sender/sender.js");
+const receiver = require('./receiver/receiver.js')
 const keyUtils = require("./key/key_utils.js")
 const {apiKeyMiddleware, jwtMiddleware} = require('./auth/auth_middleware.js')
 const { createJWT } = require('./auth/jwt_utils.js')
@@ -18,8 +19,8 @@ app.get("/", function (req, res) {
 app.post("/createDigitalSignature", apiKeyMiddleware, async function (req, res) {
   const { plainText } = req.body;
   try {
-    const signature = await sender.generateDigitalSignature(plainText);
-    res.status(200).json({signature});
+    const {signature, stringSignature } = await sender.generateDigitalSignatureV2(plainText);
+    res.status(200).json({signature: stringSignature});
     return
   } catch (err) {
     console.error(`Error: ${err}`);
@@ -37,6 +38,15 @@ app.post("/getPublicKey", jwtMiddleware, async function(req, res) {
             res.status(401).send({error: 'key pair not generated'})
         } 
         res.status(200).json({publicKey})
+})
+
+/**
+ * auth using apiKey
+ */
+app.post('/verifyMessage', apiKeyMiddleware, async function(req, res) {
+  const { stringData, stringSignature } = req.body
+  const isLegit = await receiver.verifyMessage(stringData, stringSignature)
+  res.status(200).json({isLegit})
 })
 
 app.post('/loginJwt', function(req, res) {
@@ -72,6 +82,18 @@ app.get("/deleteKeypair", function (req, res) {
   keyUtils.deleteKeyInsideKeychain();
   res.send("keypair deleted from server");
 });
+
+app.get('/testVerify', function(req, res) {
+  const verified = receiver.verifyMessage()
+  res.status(200).send('OK')
+})
+
+app.get('/createDigitalSignatureV2/:plainText', async function(req, res) {
+  const { plainText } = req.params
+  const { signature, stringSignature } = await sender.generateDigitalSignatureV2(plainText)
+  res.status(200).json({signature, stringSignature})
+})
+
 /***************************************************************************************** */
 
 app.listen(port, function () {
